@@ -1,0 +1,15 @@
+---
+description: Spec-driven workflow — no implementation without a work item
+alwaysApply: true
+---
+
+# Spec-driven development
+
+- Product or process changes need a folder under `docs/work/YYYY-MM-DD-short-name/` with `spec.md`. Chat is not the contract.
+- Parent agent orchestrates. Delegate to `spec-writer`, `planner`, `implementer`, `reviewer`, `codebase-explorer` as defined in `AGENTS.md`.
+- `spec.md` = what, why, acceptance, out of scope. No stack or folder decisions unless they *are* the requirement.
+- `plan.md` / `tasks.md` = how. Implementer follows tasks; does not rewrite the spec to fit the code.
+- Do not call work complete without `reviewer` (or an equivalent human review) and notes in `evidence.md`.
+- Parallel implementers only when they share no files.
+
+Example: “add login” → spec-writer first. “typo in README” → still a 5-line spec in a work folder, then edit.

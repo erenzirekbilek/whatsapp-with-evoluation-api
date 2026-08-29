@@ -1,0 +1,12 @@
+---
+description: Conventions for specs, plans, and work folders
+globs: docs/**/*.md
+alwaysApply: false
+---
+
+# Work item docs
+
+- Copy from `docs/templates/`. Do not invent new section names unless an ADR says so.
+- Acceptance criteria must be testable (input → observable result), not slogans.
+- Keep `docs/decisions/` for lasting WHY. Do not dump one-off task notes there.
+- Status on a work folder: `draft` → `approved` → `in-progress` → `done` (or `abandoned`).
