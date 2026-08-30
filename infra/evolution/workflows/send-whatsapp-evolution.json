@@ -1,0 +1,81 @@
+{
+  "name": "Send WhatsApp via Evolution",
+  "description": "Manual test: POST sendText to local Evolution from this PC's n8n Docker. Uses host.docker.internal so the n8n container reaches Evolution on the host. Auth is Header Auth (apikey), never stored in this JSON.",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### Setup\n1. Credentials → Header Auth. Name: `Evolution API`. Header name: `apikey`. Value: Evolution `.env` `AUTHENTICATION_API_KEY`.\n2. Open **Send text via Evolution** and pick that credential.\n3. Test workflow. Instance `Eren-Number`, number `905XXXXXXXXXX`.",
+        "height": 280,
+        "width": 380,
+        "color": 5
+      },
+      "id": "a1b2c3d4-e5f6-7890-ab12-sticky0000001",
+      "name": "Setup note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-280, -80]
+    },
+    {
+      "parameters": {},
+      "id": "b2c3d4e5-f678-9012-ab34-manual0000001",
+      "name": "When clicking Test workflow",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8080/message/sendText/Eren-Number",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"number\": \"905XXXXXXXXXX\",\n  \"text\": \"test from n8n\"\n}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-7890-1234-ab56-http000000001",
+      "name": "Send text via Evolution",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [280, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Evolution API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking Test workflow": {
+      "main": [
+        [
+          {
+            "node": "Send text via Evolution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "evolution"
+    },
+    {
+      "name": "whatsapp"
+    }
+  ],
+  "active": false
+}
