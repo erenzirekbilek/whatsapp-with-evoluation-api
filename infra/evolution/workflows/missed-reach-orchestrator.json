@@ -1,0 +1,281 @@
+{
+  "name": "Route missed-reach to salesperson WhatsApp",
+  "description": "Webhook orchestrator: failed-to-reach event selects one isolated send-message path per salesperson WhatsApp (Evolution instance). Example branches eren and mehmet; duplicate a branch per additional salesperson. Auth is Header Auth apikey, not stored in this file.",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### Missed reach\nn8n picks the salesperson branch. Each HTTP node is a separate send-message slot (own Evolution instance).\n\nCredential: Header Auth `Evolution API`, header name `apikey`.\n\nPOST JSON: salespersonId, customerNumber, optional message.",
+        "height": 320,
+        "width": 360,
+        "color": 5
+      },
+      "id": "sticky-missed-reach-001",
+      "name": "Sticky: orchestrator",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-340, -120]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "missed-reach",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-missed-reach-001",
+      "name": "Receive missed-reach event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 200],
+      "webhookId": "missed-reach-example"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-eren",
+                    "leftValue": "={{ $json.salespersonId }}",
+                    "rightValue": "eren",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "eren"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-mehmet",
+                    "leftValue": "={{ $json.salespersonId }}",
+                    "rightValue": "mehmet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "mehmet"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch-salesperson-001",
+      "name": "Route by salesperson",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8080/message/sendText/Eren-Number",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.customerNumber, text: $json.message || 'Sizi aradik, ulasamadik. Musait oldugunuzda doner misiniz?' }) }}",
+        "options": {}
+      },
+      "id": "http-send-eren-001",
+      "name": "Send as Eren",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 80],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Evolution API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8080/message/sendText/Mehmet",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.customerNumber, text: $json.message || 'Sizi aradik, ulasamadik. Musait oldugunuzda doner misiniz?' }) }}",
+        "options": {}
+      },
+      "id": "http-send-mehmet-001",
+      "name": "Send as Mehmet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 280],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Evolution API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, salespersonId: $json.salespersonId }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-ok-001",
+      "name": "Respond success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [800, 160]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ error: 'unknown_salesperson', message: 'No send-message path for this salespersonId' }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-400-001",
+      "name": "Respond unknown salesperson",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [520, 460]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ error: 'evolution_send_failed', message: $json.error || $json.message || 'Evolution request failed' }) }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "id": "respond-502-001",
+      "name": "Respond evolution error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [800, 360]
+    }
+  ],
+  "connections": {
+    "Receive missed-reach event": {
+      "main": [
+        [
+          {
+            "node": "Route by salesperson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by salesperson": {
+      "main": [
+        [
+          {
+            "node": "Send as Eren",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send as Mehmet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond unknown salesperson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send as Eren": {
+      "main": [
+        [
+          {
+            "node": "Respond success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond evolution error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send as Mehmet": {
+      "main": [
+        [
+          {
+            "node": "Respond success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond evolution error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "evolution" },
+    { "name": "whatsapp" },
+    { "name": "orchestrator" }
+  ],
+  "active": false
+}
