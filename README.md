@@ -55,10 +55,6 @@ Evolution Manager: instance listesi. Her kart bir satışçı hattı (bağlı / 
 
 ![Evolution Manager — instance listesi](docs/images/evolution-manager.png)
 
-n8n: workflow’ların yazıldığı yer. Giriş ekranı:
-
-![n8n giris](docs/images/n8n-signin.png)
-
 Örnek orchestrator (import): [infra/evolution/workflows/missed-reach-orchestrator.json](infra/evolution/workflows/missed-reach-orchestrator.json)
 
 Auth: n8n **Header Auth**, header adı `apikey` (değer JSON’da yok).
