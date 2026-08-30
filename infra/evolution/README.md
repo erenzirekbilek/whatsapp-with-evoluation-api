@@ -11,7 +11,7 @@ cd D:\software-projects\sales-whatsapp-n8n\infra\evolution
 docker compose up -d api redis postgres
 ```
 
-- Evolution panel: http://127.0.0.1:8080/manager
+- Evolution panel: http://127.0.0.1:8080/manager (logo + panel CSS: `branding/`)
 - n8n (already yours): http://127.0.0.1:5678
 
 ## Staff WhatsApp

@@ -12,6 +12,11 @@ services:
       - "127.0.0.1:8080:8080"
     volumes:
       - evolution_instances:/evolution/instances
+      - ./branding:/opt/evolution-branding:ro
+    entrypoint:
+      - /bin/bash
+      - -c
+      - cp /opt/evolution-branding/entrypoint.sh /tmp/evo-entrypoint.sh && sed -i 's/\r$//' /tmp/evo-entrypoint.sh && exec /bin/bash /tmp/evo-entrypoint.sh
     env_file:
       - .env
     networks:
