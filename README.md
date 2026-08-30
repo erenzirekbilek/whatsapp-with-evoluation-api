@@ -1,14 +1,8 @@
 # WhatsApp with Evolution API
 
-Depo: [github.com/erenzirekbilek/whatsapp-with-evoluation-api](https://github.com/erenzirekbilek/whatsapp-with-evoluation-api)
+## Bu repo ne işe yarar?
 
 Satış ekibinin **kendi WhatsApp hesaplarından**, n8n üzerinden otomatik mesaj atmasını sağlar. Tipik senaryo: müşteri arandı, **ulaşılamadı** → o satışçının WhatsApp’ından kısa bir takip mesajı gider. Müşteri QR okutmaz; gördüğü numara satışçının numarasıdır.
-
-Bu repo üç şeyi bir arada tutar: Evolution (WhatsApp oturumları), n8n örnek workflow’lar ve şirket senaryosunun yazılı tarifi.
-
-![GitHub deposu](docs/images/github-repo.png)
-
-## Bu repo ne işe yarar?
 
 | Parça | Görevi |
 |--------|--------|
