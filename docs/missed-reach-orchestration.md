@@ -39,6 +39,8 @@ Gövde örneği:
 
 `message` yoksa varsayılan ulaşılamadı metni kullanılır. Bilinmeyen `salespersonId` → 400. Evolution hatası → 502.
 
-## Üretim notu
+## Üretim (kurumsal)
 
-Oturum sunucusu (Evolution) **7/24** ayakta olmalı. Laptop denemesi production host değildir. Tek şirket (tek tenant). Müşteri QR okutmaz.
+Şirketler **kendi VPS + domain + n8n** ile entegre kurar; dizüstü Docker production değildir. Adımlar, ağ (`api:8080` vs `host.docker.internal`), TLS ve güvenlik: [kurumsal-klavuz.md](kurumsal-klavuz.md).
+
+Tek şirket (tek tenant). Müşteri QR okutmaz.

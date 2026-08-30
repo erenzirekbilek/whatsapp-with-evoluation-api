@@ -1,6 +1,8 @@
-# Evolution (Docker, local) + your existing n8n
+# Evolution (Docker)
 
-This compose is only Evolution (API, Postgres, Redis). n8n stays in your current `n8n_container` on port 5678.
+**Geliştirici / laptop:** bu dosya. **Şirket VPS + domain + n8n:** [docs/kurumsal-klavuz.md](../../docs/kurumsal-klavuz.md) — `host.docker.internal` yerine `http://api:8080`.
+
+This compose is only Evolution (API, Postgres, Redis). Local n8n often stays in a separate `n8n_container` on port 5678.
 
 ## Start Evolution
 
