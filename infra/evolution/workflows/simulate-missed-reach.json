@@ -1,0 +1,202 @@
+{
+  "name": "Simulate missed-reach event",
+  "description": "Test harness for the missed-reach scenario: a form lets you pick a salesperson and type a fake customer number, then POSTs the event into the orchestrator's webhook exactly like a CRM/santral would. Use it to prove the whole chain (n8n routing -> Evolution instance -> WhatsApp) without waiting for a real missed call. Import alongside missed-reach-orchestrator.json.",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### Simulate missed-reach\nStandalone test workflow. Fills in a fake \"aranildi, ulasilamadi\" event and posts it to the orchestrator's webhook, so you can see a real WhatsApp message go out end-to-end.\n\n1. Import + activate `missed-reach-orchestrator.json` first.\n2. Open this workflow, click \"Test workflow\" on the Form Trigger (or open its production URL).\n3. Pick a salesperson, type YOUR OWN test number, submit.\n4. Check the phone tied to that Evolution instance for the message.\n\nIf the orchestrator is still inactive, point the HTTP node at its /webhook-test/ URL instead of /webhook/.",
+        "height": 360,
+        "width": 380,
+        "color": 4
+      },
+      "id": "sticky-simulate-001",
+      "name": "Sticky: how to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-380, -140]
+    },
+    {
+      "parameters": {
+        "formTitle": "Simulate missed-reach event",
+        "formDescription": "Fake bir \"arandi, ulasilamadi\" olayi uretip orchestrator webhook'una gonderir.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Satisci",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  { "option": "eren" },
+                  { "option": "mehmet" }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Musteri numarasi",
+              "fieldType": "text",
+              "placeholder": "905xxxxxxxxx",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Mesaj (opsiyonel)",
+              "fieldType": "text",
+              "placeholder": "Bos birakilirsa varsayilan takip metni gider",
+              "requiredField": false
+            }
+          ]
+        },
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "form-trigger-simulate-001",
+      "name": "Fill fake missed-reach event",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [0, 200],
+      "webhookId": "simulate-missed-reach"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-salesperson",
+              "name": "salespersonId",
+              "type": "string",
+              "value": "={{ $json['Satisci'] }}"
+            },
+            {
+              "id": "assign-customer",
+              "name": "customerNumber",
+              "type": "string",
+              "value": "={{ $json['Musteri numarasi'] }}"
+            },
+            {
+              "id": "assign-message",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json['Mesaj (opsiyonel)'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-build-payload-001",
+      "name": "Build event payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [260, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/missed-reach",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ salespersonId: $json.salespersonId, customerNumber: $json.customerNumber, message: $json.message || undefined }) }}",
+        "options": {}
+      },
+      "id": "http-post-orchestrator-001",
+      "name": "POST to missed-reach webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 200],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "result-ok",
+              "name": "result",
+              "type": "string",
+              "value": "=OK: orchestrator {{ $json.salespersonId }} icin WhatsApp'i tetikledi. Telefonu kontrol et."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-result-ok-001",
+      "name": "Simulation result: sent",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [800, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "result-fail",
+              "name": "result",
+              "type": "string",
+              "value": "=FAILED: orchestrator webhook'a ulasamadi ya da hata dondu. Aktif mi, path /webhook/missed-reach mi kontrol et. Detay: {{ $json.error || $json.message || 'bilinmiyor' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-result-fail-001",
+      "name": "Simulation result: failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [800, 320]
+    }
+  ],
+  "connections": {
+    "Fill fake missed-reach event": {
+      "main": [
+        [
+          {
+            "node": "Build event payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build event payload": {
+      "main": [
+        [
+          {
+            "node": "POST to missed-reach webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST to missed-reach webhook": {
+      "main": [
+        [
+          {
+            "node": "Simulation result: sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Simulation result: failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "evolution" },
+    { "name": "whatsapp" },
+    { "name": "simulation" }
+  ],
+  "active": false
+}

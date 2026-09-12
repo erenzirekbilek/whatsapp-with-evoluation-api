@@ -1,14 +1,8 @@
 # WhatsApp with Evolution API
 
-Depo: [github.com/erenzirekbilek/whatsapp-with-evoluation-api](https://github.com/erenzirekbilek/whatsapp-with-evoluation-api)
+## Bu repo ne işe yarar?
 
 Satış ekibinin **kendi WhatsApp hesaplarından**, n8n üzerinden otomatik mesaj atmasını sağlar. Tipik senaryo: müşteri arandı, **ulaşılamadı** → o satışçının WhatsApp’ından kısa bir takip mesajı gider. Müşteri QR okutmaz; gördüğü numara satışçının numarasıdır.
-
-Bu repo üç şeyi bir arada tutar: Evolution (WhatsApp oturumları), n8n örnek workflow’lar ve şirket senaryosunun yazılı tarifi.
-
-![GitHub deposu](docs/images/github-repo.png)
-
-## Bu repo ne işe yarar?
 
 | Parça | Görevi |
 |--------|--------|
@@ -16,7 +10,9 @@ Bu repo üç şeyi bir arada tutar: Evolution (WhatsApp oturumları), n8n örnek
 | **n8n** | Orchestrator: “kim aradı, kime yazılacak, hangi metin” kararını verir; doğru instance’a HTTP atar. |
 | **Doküman + örnek JSON** | Ulaşılamadı senaryosunu ve örnek workflow’u açıklar; API anahtarı dosyada tutulmaz. |
 
-Local kurulum (pilot): [infra/evolution/README.md](infra/evolution/README.md). Senaryo metni: [docs/missed-reach-orchestration.md](docs/missed-reach-orchestration.md).
+Local kurulum (geliştirici kanıtı): [infra/evolution/README.md](infra/evolution/README.md). Senaryo: [docs/missed-reach-orchestration.md](docs/missed-reach-orchestration.md).
+
+**Kurumsal (VPS + domain + n8n aynı ortam):** şirketler sistemi laptop’tan işletmez. Kendi sunucuları, domain’leri ve n8n’leri vardır; Evolution oraya entegre edilir. Kılavuz: [docs/kurumsal-klavuz.md](docs/kurumsal-klavuz.md).
 
 ## Mimari
 
@@ -46,7 +42,9 @@ flowchart LR
 
 1. Dış sistem (CRM, santral veya form) n8n’e “ulaşılamadı” olayını yollar: satışçı kimliği + müşteri numarası.
 2. n8n Switch ile **yalnızca o satışçının** dalını çalıştırır.
-3. HTTP `POST .../message/sendText/{instanceAdi}` — n8n Docker’dan Evolution’a `http://host.docker.internal:8080`.
+3. HTTP `POST .../message/sendText/{instanceAdi}`.
+   - Laptop + ayrı n8n konteyneri: `http://host.docker.internal:8080`
+   - VPS’te n8n ile Evolution aynı Docker ağı: `http://api:8080` — [kurumsal kılavuz](docs/kurumsal-klavuz.md)
 4. Evolution, o instance’ın bağlı telefonundan mesajı iletir.
 
 n8n **metni ve kime** yazılacağını bilir. Evolution **oturumu** tutar. Personel bir kez QR ile bağlanır.
@@ -56,10 +54,6 @@ n8n **metni ve kime** yazılacağını bilir. Evolution **oturumu** tutar. Perso
 Evolution Manager: instance listesi. Her kart bir satışçı hattı (bağlı / kopuk). Aşağıdaki görüntüde kişisel numara bulanık.
 
 ![Evolution Manager — instance listesi](docs/images/evolution-manager.png)
-
-n8n: workflow’ların yazıldığı yer. Giriş ekranı:
-
-![n8n giris](docs/images/n8n-signin.png)
 
 Örnek orchestrator (import): [infra/evolution/workflows/missed-reach-orchestrator.json](infra/evolution/workflows/missed-reach-orchestrator.json)
 
